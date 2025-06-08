@@ -1,3 +1,5 @@
+import { Chatbot } from '@/components/ui'
+
 /*
  * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  This is a starter component and can be deleted.
@@ -424,7 +426,7 @@ export function NxWelcome({ title }: { title: string }) {
         gap: 4rem;
       }
     }
-          `,
+          `
         }}
       />
       <div className="wrapper">
@@ -436,7 +438,10 @@ export function NxWelcome({ title }: { title: string }) {
             </h1>
           </div>
 
-          <div id="hero" className="rounded">
+          <div
+            id="hero"
+            className="rounded"
+          >
             <div className="text-container">
               <h2>
                 <svg
@@ -470,7 +475,10 @@ export function NxWelcome({ title }: { title: string }) {
 
           <div id="middle-content">
             <div id="middle-content-container">
-              <div id="learning-materials" className="rounded shadow">
+              <div
+                id="learning-materials"
+                className="rounded shadow"
+              >
                 <h2>Learning materials</h2>
                 <a
                   href="https://nx.dev/getting-started/intro?utm_source=nx-project"
@@ -694,7 +702,10 @@ export function NxWelcome({ title }: { title: string }) {
                   </span>
                 </span>
               </a>
-              <div id="nx-cloud" className="rounded shadow">
+              <div
+                id="nx-cloud"
+                className="rounded shadow"
+              >
                 <div>
                   <svg
                     id="nx-cloud-logo"
@@ -735,7 +746,10 @@ export function NxWelcome({ title }: { title: string }) {
             </div>
           </div>
 
-          <div id="commands" className="rounded shadow">
+          <div
+            id="commands"
+            className="rounded shadow"
+          >
             <h2>Next steps</h2>
             <p>Here are some things you can do with Nx:</p>
             <details>
@@ -849,8 +863,9 @@ export function NxWelcome({ title }: { title: string }) {
           </p>
         </div>
       </div>
+      <Chatbot />
     </>
-  );
+  )
 }
 
-export default NxWelcome;
+export default NxWelcome
