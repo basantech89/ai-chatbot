@@ -37,9 +37,10 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui'
-import { runModel } from '@/lib/llm'
-import { Message } from 'ollama'
+import { LLM } from '@/lib/llm'
 import ReactMarkdown from 'react-markdown'
+
+const llm = new LLM()
 
 const users = [
   {
@@ -74,37 +75,31 @@ type User = (typeof users)[number]
 export function Chatbot() {
   const [open, setOpen] = React.useState(false)
   const [sendingMessage, setSendingMessage] = React.useState(false)
+  const [assistantSending, setAssistantSending] = React.useState(false)
   const [selectedUsers, setSelectedUsers] = React.useState<User[]>([])
   const [assistantMessage, setAssistantMessage] = React.useState('')
+
+  const messages = React.useSyncExternalStore(
+    llm.subscribe.bind(llm),
+    llm.getSnapshot.bind(llm)
+  )
 
   const devRef = React.useRef<HTMLDivElement>(null)
 
   const [chatbotOpen, setChatbotOpen] = React.useState(false)
   const toggleChatbot = () => setChatbotOpen(!chatbotOpen)
 
-  const [chatHistory, setChatHistory] = React.useState<Message[]>([])
-
   const [input, setInput] = React.useState('')
   const inputLength = input.trim().length
 
-  if (!chatbotOpen) {
-    return (
-      <Button
-        size="icon"
-        id="chatbot-btn"
-        className="fixed bottom-10 right-10 size-12"
-        onClick={toggleChatbot}
-      >
-        <BotMessageSquare />
-      </Button>
-    )
-  }
-
-  const sendMessage = async (messages: Message[]) => {
+  const sendMessage = async () => {
     const isSending = true
     setSendingMessage(isSending)
+    setAssistantSending(true)
 
-    const stream = await runModel(messages)
+    const stream = await llm.sendMessage(input)
+    setInput('')
+
     for await (const chunk of stream) {
       setAssistantMessage(prev => prev + chunk)
 
@@ -120,6 +115,9 @@ export function Chatbot() {
         setSendingMessage(false)
       }
     }
+
+    setAssistantMessage('')
+    setAssistantSending(false)
   }
 
   const triggerMessage = (event: React.FormEvent<HTMLFormElement>) => {
@@ -128,18 +126,21 @@ export function Chatbot() {
       return
     }
 
-    const newMessages = [...chatHistory]
-    if (assistantMessage) {
-      newMessages.push({ role: 'assistant', content: assistantMessage })
-    }
-
-    newMessages.push({ role: 'user', content: input })
-    setChatHistory(newMessages)
-
     setAssistantMessage('')
-    setInput('')
+    sendMessage()
+  }
 
-    sendMessage(newMessages)
+  if (!chatbotOpen) {
+    return (
+      <Button
+        size="icon"
+        id="chatbot-btn"
+        className="fixed bottom-10 right-10 size-12"
+        onClick={toggleChatbot}
+      >
+        <BotMessageSquare />
+      </Button>
+    )
   }
 
   return (
@@ -187,7 +188,7 @@ export function Chatbot() {
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto">
           <div className="flex flex-col gap-4">
-            {chatHistory.map((message, index) => (
+            {messages.map((message, index) => (
               <div
                 key={index}
                 className={cn(
@@ -238,7 +239,7 @@ export function Chatbot() {
               type="submit"
               size="icon"
               className="absolute top-1/2 right-2 size-6 -translate-y-1/2 rounded-full"
-              disabled={inputLength === 0}
+              disabled={inputLength === 0 || assistantSending}
             >
               <ArrowUpIcon className="size-3.5" />
               <span className="sr-only">Send</span>
