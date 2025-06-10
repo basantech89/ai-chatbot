@@ -1,4 +1,3 @@
-import { Chatbot } from '@/components/ui'
 import NxWelcome from './nx-welcome'
 
 import { Route, Routes } from 'react-router-dom'
@@ -11,10 +10,10 @@ export function App() {
           path="/"
           element={<NxWelcome title="ai-chatbot" />}
         />
-        <Route
+        {/* <Route
           path="/page-2"
-          element={<Chatbot />}
-        />
+          element={<AirlineChatbotWithoutStreaming />}
+        /> */}
       </Routes>
       {/* END: routes */}
     </div>

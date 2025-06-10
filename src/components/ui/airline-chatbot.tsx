@@ -39,8 +39,7 @@ import {
 } from '@/components/ui'
 import { LLM } from '@/lib/llm'
 import ReactMarkdown from 'react-markdown'
-
-const llm = new LLM()
+import { Tool } from 'openai/resources/responses/responses.mjs'
 
 const users = [
   {
@@ -72,7 +71,36 @@ const users = [
 
 type User = (typeof users)[number]
 
-export function Chatbot() {
+const llm = new LLM(
+  'GPT',
+  'gpt-4.1-nano',
+  `You are a helpful assistant for an Airline called FlightAI. \
+Give short, courteous answers, no more than 1 sentence. \
+Always be accurate. If you don't know the answer, say so.`
+)
+
+const tools: Tool[] = [
+  {
+    type: 'function',
+    name: 'getTicketPrice',
+    description:
+      "Get the price of a return ticket to the destination city. Call this whenever you need to know the ticket price, for example when a customer asks 'How much is a ticket to this city'",
+    parameters: {
+      type: 'object',
+      properties: {
+        destinationCity: {
+          type: 'string',
+          description: 'The city that the customer wants to travel to'
+        }
+      },
+      required: ['destinationCity'],
+      additionalProperties: false
+    },
+    strict: true
+  }
+]
+
+export function AirlineChatbot() {
   const [open, setOpen] = React.useState(false)
   const [sendingMessage, setSendingMessage] = React.useState(false)
   const [assistantSending, setAssistantSending] = React.useState(false)
@@ -97,7 +125,7 @@ export function Chatbot() {
     setSendingMessage(isSending)
     setAssistantSending(true)
 
-    const stream = await llm.sendMessage(input)
+    const stream = await llm.streamMessage(input, { stream: true, tools })
     setInput('')
 
     for await (const chunk of stream) {
@@ -198,7 +226,7 @@ export function Chatbot() {
                     : 'bg-muted'
                 )}
               >
-                <ReactMarkdown>{message.content}</ReactMarkdown>
+                <ReactMarkdown>{message.content as string}</ReactMarkdown>
               </div>
             ))}
 
@@ -214,10 +242,10 @@ export function Chatbot() {
             )}
 
             {sendingMessage && (
-              <div className="flex w-min px-4 pt-3 pb-2 rounded space-x-2 justify-center items-center bg-muted dark:invert">
-                <div className="h-2 w-2 bg-black pt-2 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                <div className="h-2 w-2 bg-black pt-2 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                <div className="h-2 w-2 bg-black pt-2 rounded-full animate-bounce"></div>
+              <div className="flex w-min px-4 pt-3 pb-2 rounded space-x-1 justify-center items-center bg-muted dark:invert">
+                <div className="h-0.5 w-2 bg-black pt-2 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="h-0.5 w-2 bg-black pt-2 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="h-0.5 w-2 bg-black pt-2 rounded-full animate-bounce"></div>
               </div>
             )}
           </div>

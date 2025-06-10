@@ -1,4 +1,4 @@
-import { Chatbot } from '@/components/ui'
+import { AirlineChatbot, AirlineChatbotWithoutStreaming } from '@/components/ui'
 
 /*
  * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -863,7 +863,8 @@ export function NxWelcome({ title }: { title: string }) {
           </p>
         </div>
       </div>
-      <Chatbot />
+
+      <AirlineChatbot />
     </>
   )
 }
